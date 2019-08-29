@@ -3,29 +3,28 @@ Let’s create an AI that learns to play Atari Breakout using RAM inputs and Dee
 
 ## Table of contents:
 1. Reinforcement Learning
-    1. RL vs supervised vs unsupervised
-    2. terminology 1
+    1. RL vs Supervised vs Unsupervised
+    2. Terminology
     3. Markov Decision Process
-    4. terminology 2
-    5. reward and return
-    6. action value function
-    7. Bellman equation
-    8. Q-learning algorithm
-    9. exploration-exploitation tradeoff
-    10. Q-function approximation using neural networks
+    4. Return
+    5. Action Value Function
+    6. Bellman Equation
+    7. Q-Learning Algorithm
+    8. Exploration-Exploitation Tradeoff
+    9. Q-function Approximation using Neural Networks
 2. Results
-    1. model architecture and hyperparameter
+    1. Model Architecture and Hyperparameter
 3. Optimizations
-    1. Huber loss
-    2. experience replay
-    3. prioritized experience replay
-    4. fixed target networks
-    5. double DQN
+    1. Huber Loss
+    2. Experience Replay
+    3. Prioritized Experience Replay
+    4. Fixed Target Networks
+    5. Double DQN
     
 ## Reinforcement Learning
 Reinforcement learning is an area of Machine Learning concerned with how agents should take actions in an environment to maximize some notion of cumulative reward.
 
-### RL vs supervised vs unsupervised
+### RL vs Supervised vs Unsupervised
 Reinforcement learning is a different paradigm in machine learning. In a supervised learning setting, we have some training data, use the data to train our model, then we can use it to predict new unlabelled data. There is always a correct answer for classification problems and a target for regression problems. Examples of supervised learning are predicting housing prices and image classification. In an unsupervised learning setting, we have a lot of data, and we can use it to find hidden patterns in the data. Examples of unsupervised learning include word2vec and clustering. For reinforcement learning, we are just trying to maximize reward in an environment, it does not fit into supervised or unsupervised settings.
 
 > **_SIDENOTE: Can we train our agent using supervised learning?_** 
@@ -83,7 +82,7 @@ The only difference between the discounted return and undiscounted return is tha
 
 The structure of the discounted return has a nice mathematical property, we can recursively breakdown a return into the immediate reward + discounted future reward. We will exploit this property soon.
 
-### Action-value function
+### Action-Value Function
 
 **On-policy action value function** is the expected return if we start in state <img src="https://latex.codecogs.com/svg.latex?s_t" />, take any arbitrary action <img src="https://latex.codecogs.com/svg.latex?a" />(does to have to come from our policy), then always act according to our policy <img src="https://latex.codecogs.com/svg.latex?\pi" /> afterwards.
 
@@ -111,13 +110,13 @@ Remember the recursive definition for our return? This is used in the **optimal 
 
 This equation looks intimidating but the idea is very simple. It simply states that the value of your starting point is the immediate reward you expect to get from being there + the discounted value of where you land next. There is a more formal explanation and proof of the Bellman equation [here](https://joshgreaves.com/reinforcement-learning/understanding-rl-the-bellman-equations/). 
 
-### Q-learning
+### Q-Learning
 
 Now we can learn <img src="http://latex.codecogs.com/svg.latex?Q^*"/> by using this definition and dynamic programming.
 
 Let <img src="http://latex.codecogs.com/svg.latex?Q" /> be an action-value function which hopefully approximates <img src="http://latex.codecogs.com/svg.latex?Q^*" />. Initially it can be completely random or all zero, but it will hopefully converge to <img src="http://latex.codecogs.com/svg.latex?Q^*" />. For now, let's assume that we have a **tabular representation** of <img src="http://latex.codecogs.com/svg.latex?Q" />, this means that there is a large table with two columns. The left column contains all of the state-action action pairs, the right column has the <img src="http://latex.codecogs.com/svg.latex?Q" />-value for each state-action pair.
 
-The **Bellman error** is the update to our expected return when we observe the next state <img src="http://latex.codecogs.com/svg.latex?s^'" />
+The **Bellman Error** is the update to our expected return when we observe the next state <img src="http://latex.codecogs.com/svg.latex?s^'" />
 
 <p align="center">
 <img src="https://latex.codecogs.com/gif.latex?\underbrace{r(s,&space;a)&plus;\gamma&space;\max&space;_{a}&space;Q\left(s^{\prime},&space;a\right)}_{\text&space;{inside&space;}&space;\mathbb{E}&space;\text&space;{&space;in&space;the&space;Bellman&space;eqn&space;}}-Q(s,&space;a)">
@@ -131,7 +130,7 @@ The left side is our target, and the right side is our current prediction. We wa
 
 [Here](https://www.mladdict.com/q-learning-simulator) is a very good demonstration of the Q-learning algorithm in action.
 
-### exploration-exploitation tradeoff
+### Exploration-Exploitation Tradeoff
 
 One of the problems with <img src="http://latex.codecogs.com/svg.latex?Q" />-learning is that it only learns about states and actions it visits. If it never visits a state, it will never understand the value of going to that state. So sometimes we should pick suboptimal actions in order to visit new states.
 
@@ -141,7 +140,7 @@ A very simple solution is to use the **<img src="http://latex.codecogs.com/svg.l
 
 With a probability of <img src="http://latex.codecogs.com/svg.latex?\epsilon" />, we choose a random action to explore the environment. With a probability of 1-<img src="http://latex.codecogs.com/svg.latex?\epsilon" />, we exploit by choosing the optimal action according to <img src="http://latex.codecogs.com/svg.latex?Q" />
 
-### Q-function approximation using neural networks
+### Q-Function Approximation using Neural Networks
 
 Let's fix our previous assumption about a tabular representation of <img src="http://latex.codecogs.com/svg.latex?Q" />. There is nothing inherently wrong with a tabular representation of <img src="http://latex.codecogs.com/svg.latex?Q" />, but it is only feasible for problems with very small state space. Breakout has a very large state space.
 
@@ -155,14 +154,14 @@ A common architecture is for the neural network to take an entire state as its i
 <img src="https://deeplizard.com/images/Deep%20Q-Network.png", height="300"/>
 </p>
 
-Just like before, we update our network using our experience <img src="http://latex.codecogs.com/svg.latex?(s,a,s',r)" /> interacting with the environment. We want our network's prediction <img src="http://latex.codecogs.com/svg.latex?Q(s,a)" /> to move towards the target <img src="http://latex.codecogs.com/svg.latex?t" />
+Just like before, we update our network using our experience <img src="http://latex.codecogs.com/svg.latex?(s,a,s',r)" /> interacting with the environment. We want our network's prediction <img src="http://latex.codecogs.com/svg.latex?Q(s,a)" /> to move towards the target <img src="http://latex.codecogs.com/svg.latex?t" />.
 
 <p align="center">
 <img src="http://latex.codecogs.com/svg.latex?\begin{array}{c}{t=r(s, a)+\gamma \underset{a'}{\text{max}}Q\left(s^{\prime},a^{\prime}\right)}\\ {\theta \leftarrow\theta-\alpha\frac{\partial}{\partial\theta}\mathcal{L}(Q(s,a),t)}\end{array}"/>
 </p>
 
 ## Results
-+
+
 <p align="center">
 <img src="https://i.imgur.com/wFZmjtj.gif" />
 </p>
@@ -178,19 +177,18 @@ These are the scores achieved by the agent after training for 190 hours. The blu
 
 My model has 7 hidden layers, with 512, 256, 128, 64, 32, 16, and 8 hidden units for each respective layer, ReLU activation is used after each layer. There are a total of 241,308 weights in this network. 
 
-learning rate starts at 0.00001, but reduced to 0.000001 after 7000 episodes. 
 <img src="http://latex.codecogs.com/svg.latex?\epsilon" /> starts at 1, then reduced linearly to 0.1 over 1,000,000 timesteps.
-<img src="http://latex.codecogs.com/svg.latex?\gamma" /> is set to 0.99, batch size set to 32.
+<img src="http://latex.codecogs.com/svg.latex?\gamma" /> is set to 0.99, batch size set to 32, and learning rate set to 0.00001.
 
 ## Optimizations
 
 Even though my agent did not perform very well, here are some of the optimizations I made to improve the performance of my agent.
 
-### Huber loss
+### Huber Loss
 
 Usually, Mean Square Error or Cross Entropy loss is used to measure the error of a prediction. In reinforcement learning, a different loss function called  **Huber loss** is commonly used instead.
 
-Huber loss (called smooth l1 loss in PyTorch) is a mixture of Mean Absolute Error (L1 loss) and Mean Square Error (L2 loss). The benefit of Huber loss is that it provides the benefits of MSE when the error is small but it is less sensitive to outliers when the error is high. The Huber loss is a piecewise function composed of rescaled MSE and translated MAE.
+Huber loss (called smooth l1 loss in PyTorch) is a mixture of Mean Absolute Error (L1 loss) and Mean Square Error (L2 loss). The benefit of Huber loss is that it provides the benefits of MSE (gradient increases with error) when the error is small but it is less sensitive to outliers when the error is high. The Huber loss is a piecewise function composed of rescaled MSE and translated MAE.
 
 <p align="center">
 <img src="https://latex.codecogs.com/gif.latex?z_{i}=\left\{\begin{array}{ll}{0.5\left(x_{i}-y_{i}\right)^{2},}&{\text{&space;if&space;}\left|x_{i}-y_{i}\right|<1}\\&space;{\left|x_{i}-y_{i}\right|-0.5,}&{\text{&space;otherwise}}\end{array}\right."/>
@@ -200,7 +198,7 @@ Huber loss (called smooth l1 loss in PyTorch) is a mixture of Mean Absolute Erro
 <img src="https://i.imgur.com/wBAEdJn.png" height="250"/>
 </p>
 
-Here is the comparison between MSE (blue) and Huber (red). MSE's gradient increases quadratically, Huber's gradient increases quadratically in the beginning but remains constant once the error exceeds 1.
+Here is the comparison between MSE (blue) and Huber (red). MSE's gradient increases quadratically, Huber's gradient increases when error is small but remains constant once the error exceeds 1.
 
 ### Experience Replay
 
@@ -254,4 +252,4 @@ Hasselt et al proposed double DQNs to decouple action selection from target eval
 
 <a name="fourtha">[4](#fourthb)</a>: https://github.com/rlcode/per/
 
-<a name="fiftha">[5](#fifthb)</a>: https://arxiv.org/pdf/1509.06461.pdf
+<a name="fiftha">[5](#fifthb)</a>: https://arxiv.org/abs/1509.06461
