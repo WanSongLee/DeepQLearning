@@ -103,17 +103,17 @@ class Trainer:
         
         ###########single dqn#############
 #         max_next_q = self.agent.target_network(next_state.to(device)).max()
-#         expected_q = reward + (1-done) * (GAMMA * max_next_q)
+#         target_q = reward + (1-done) * (GAMMA * max_next_q)
         ###########single dqn#############
 
         ###########double dqn#############
         best_next_action = self.agent.q_network(next_state.to(device)).max(0)[1]
         best_next_q = self.agent.target_network(next_state.to(device))[best_next_action]
-        expected_q = reward + (1-done) * (GAMMA * best_next_q)
+        target_q = reward + (1-done) * (GAMMA * best_next_q)
         ###########double dqn#############
         
         # calculate and save the error to our memory, use for importance sampling
-        error = abs((current_q - expected_q).item())
+        error = abs((current_q - target_q).item())
         self.memory.add(error, (state.numpy(), action, reward, next_state.numpy(), done))
     
     def learn(self):
@@ -145,23 +145,23 @@ class Trainer:
         
         ###########single dqn#############
 #         max_next_q = self.agent.target_network(next_states).detach().max(1)[0]
-#         expected_q = rewards + (1-dones) * (GAMMA * max_next_q)
+#         target_q = rewards + (1-dones) * (GAMMA * max_next_q)
         ###########single dqn#############
         
         ###########double dqn#############
         best_next_actions = self.agent.q_network(next_states).detach().max(1)[1]
         best_next_q = self.agent.target_network(next_states).gather(1, best_next_actions.unsqueeze(1)).squeeze(1).detach()
-        expected_q = rewards + (1-dones) * (GAMMA * best_next_q)
+        target_q = rewards + (1-dones) * (GAMMA * best_next_q)
         ###########double dqn#############
         
         # update error in memory
-        errors = torch.abs(current_q - expected_q).cpu().data.numpy()
+        errors = torch.abs(current_q - target_q).cpu().data.numpy()
         for i in range(self.batch_size):
             idx = idxs[i]
             self.memory.update(idx, errors[i])
             
         # each transition has its own importance-sampling weight
-        temp = F.smooth_l1_loss(current_q, expected_q, reduction ='none')
+        temp = F.smooth_l1_loss(current_q, target_q, reduction ='none')
         loss = (torch.FloatTensor(is_weights).to(device) * temp).mean()
         
         self.loss_history.append(loss.item())
