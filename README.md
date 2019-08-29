@@ -56,10 +56,7 @@ The **trajectory**(**episode**, **rollout**) <img src="https://latex.codecogs.co
 
 We will represent our environment as a **Markov Decision Process**. This means that our representation of the state needs to satisfy the **Markov assumption**. The Markov assumption states that all relevant information is encapsulated in the current state, i.e. the future is independent of the past given the present.
 
-Markov assumption is a little confusing, so let us go through an example. Let's say that we are playing a game of Breakout and we decide to use the current image frame to represent our state. 
- 
-
-Here is a question, what action should you pick next? Well, the frame tells us where the bricks/ball/player is, but our action should also depend on the ball's velocity. If the ball is moving towards bottom-left, we should obviously move left as well. Instead, we can represent our state as a stack of past few frames, then the velocity will be encapsulated in our state. Thus the Markov assumption would be satisfied.
+Markov assumption is a little confusing, so let us go through an example. Let's say that we are playing a game of Breakout and we decide to use the current image frame to represent our state. The frame tells us where the bricks/ball/player is, but our action should also depend on the ball's velocity. If the ball is moving towards bottom-left, we should move left as well. To encapsulate the the ball's velocity, we can represent our state as a stack of last few frames. Thus the Markov assumption would be satisfied.
 
 For this project, we are not dealing with image inputs, we are dealing with RAM inputs. The RAM inputs are a 128-byte array that is used by the emulator to represent the state of the game. We can guess that some of the bytes will be used to store which bricks are still available, numbers of lives, the position and velocity of the player and ball, etc. Because the RAM state is also used by the emulator to represent the state of the game, it is guaranteed to satisfy the Markov assumption as all relevant information is encapsulated in the RAM state.
 
@@ -76,11 +73,11 @@ We can solve this problem using **infinite-horizon discounted return**.
 
 The only difference between the discounted return and undiscounted return is that there is a power of **discount factor** <img src="http://latex.codecogs.com/svg.latex?\gamma^t" /> multiplied with each reward. The discount factor is a value between 0 and 1, it determines how important the future is compared to the present. This means that an immediate reward is better than a future reward. When <img src="http://latex.codecogs.com/svg.latex?\gamma" /> is close to 0, the agent is myopic and only cares about the immediate reward. When <img src="http://latex.codecogs.com/svg.latex?\gamma" /> is close to 1, the agent is farsighted and cares about all of the future rewards equally.
 
-<p align="center"> 
+The structure of the discounted return has a nice mathematical property, we can recursively breakdown a return into the immediate reward <img src="http://latex.codecogs.com/svg.latex?r_t" /> + discounted future return <img src="http://latex.codecogs.com/svg.latex?\gamma%20 R(\mathcal{T'})" />. We will exploit this property soon.
+
+<p align="center">
 <img src="http://latex.codecogs.com/svg.latex?\begin{align*}%20R(\mathcal{T})&=\sum_{t=0}^\infty%20\gamma^tr_t\\%20&=%20r_t+\gamma%20r_{t+1}+\gamma^2r_{t+2}+\gamma^3r_{t+3}+...\\%20&=%20r_t+\gamma%20(r_{t+1}+\gamma%20r_{t+2}+\gamma^2r_{t+3}+...)\\%20&=%20r_t+\gamma%20R(\mathcal{T}%27)\\%20\end{align*}" />
 </p>
-
-The structure of the discounted return has a nice mathematical property, we can recursively breakdown a return into the immediate reward + discounted future reward. We will exploit this property soon.
 
 ### Action-Value Function
 
@@ -171,7 +168,7 @@ This is the best game played by my agent, it scored 376 points.
 <img src="https://i.imgur.com/GqtJ0qp.png" width="400" /> <img src="https://i.imgur.com/E5p0UBN.png" width="400"/>
 </p>
 
-These are the scores achieved by the agent after training for 190 hours. The blue lines are the score for each episode, the orange lines are the 100 episode rolling average. Both graphs depict the same data, but the second graph is zoomed in so it is easier to see the improvement. It peaked after 18000 episodes, then the performance starts to fluctuate randomly. 
+These are the scores achieved by the agent after training for 190 hours. The blue lines are the score for each episode, the orange lines are the 100 episode rolling average. Both graphs depict the same data, but the second graph is zoomed in so it is easier to see the improvement. It peaked at 18000 episodes, then the performance starts to fluctuate randomly. 
 
 ### Model Architecture and Hyperparameters
 
@@ -234,11 +231,11 @@ Let's take a closer look at the way <img src="http://latex.codecogs.com/svg.late
 <img src="https://latex.codecogs.com/gif.latex?t=r(s,a)&plus;\gamma\max_{a'}Q\left(s',a'\right)"/>
 </p>
 
-In this equation, we are assuming that the best action for the next state is the action with the highest <img src="http://latex.codecogs.com/svg.latex?Q" />-value, but how are we sure this is true? This is true when we already have the optimal <img src="http://latex.codecogs.com/svg.latex?Q" />-function, but we do not have the optimal <img src="http://latex.codecogs.com/svg.latex?Q" />-function yet, we are trying to learn it.
+In this equation, we are assuming that the best action for the next state is the action with the highest <img src="http://latex.codecogs.com/svg.latex?Q" />-value, but how are we sure this is true? This would be true if we already have the optimal <img src="http://latex.codecogs.com/svg.latex?Q" />-function, but we do not have the optimal <img src="http://latex.codecogs.com/svg.latex?Q" />-function yet, we are trying to learn it.
    
-The accuracy of the <img src="http://latex.codecogs.com/svg.latex?Q" />-values depends on what states/actions we have explored. When we visit a state for the first time, we do not have enough information about the best action to take. Training becomes complicated because we don't have enough information about what action to take.
+The accuracy of the <img src="http://latex.codecogs.com/svg.latex?Q" />-values depends on what states/actions we have explored. When we visit a state for the first time, we do not have enough information about the best action to take. If non-optimal actions are regularly given a higher Q value than the optimal best action, the learning will be complicated.
 
-Hasselt et al proposed double DQNs to decouple action selection from target evaluation<sup> <a name="fifthb"> [\[5\]](#fiftha)</a> </sup>. We use the <img src="http://latex.codecogs.com/svg.latex?Q" />-network to select the best action to take for the next state, then use the target network to evaluate the <img src="http://latex.codecogs.com/svg.latex?Q" />-value of taking that action. Doing this can help reduce overestimation of the <img src="http://latex.codecogs.com/svg.latex?Q" />-value.
+Hasselt et al proposed double DQNs to decouple action selection from target evaluation<sup> <a name="fifthb"> [\[5\]](#fiftha)</a> </sup>. We use the <img src="http://latex.codecogs.com/svg.latex?Q" />-network to select the best action to take for the next state, then use the target network to evaluate the <img src="http://latex.codecogs.com/svg.latex?Q" />-value of taking that action. Doing this can help reduce overestimation of <img src="http://latex.codecogs.com/svg.latex?Q" />-values.
 <p align="center">
 <img src="https://cdn-media-1.freecodecamp.org/images/1*g5l4q162gDRZAAsFWtX7Nw.png" width="400" />
 </p>
