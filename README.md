@@ -38,7 +38,8 @@ Reinforcement learning is a different paradigm in machine learning. In a supervi
     
 ### Terminology
 
-In Reinforcement learning, we have an **agent** that interacts with the **environment**
+In Reinforcement learning, we have an **agent** that interacts with the **environment**.
+
 At every interaction/timestep:
 1. The agent receives the **state** <img src="https://latex.codecogs.com/svg.latex?s_t" /> from the environment
 2. The agent will use the state to make an **action** <img src="https://latex.codecogs.com/svg.latex?a_t" /> based on the state, then sends it to the environment
@@ -93,7 +94,7 @@ The structure of the discounted return has a nice mathematical property, we can 
 <img src="http://latex.codecogs.com/svg.latex?Q^{*}(s,%20a)=\max%20_{\pi}%20\underset{\tau%20\sim%20\pi}{\mathrm{E}}\left[R(\tau)%20|%20s_{0}=s,%20a_{0}=a\right]"/>
 </p>
 
-The action value function is also called <img src="http://latex.codecogs.com/svg.latex?Q" />-function, it is the function that our algorithm is trying to find. Once we have the optimal <img src="http://latex.codecogs.com/svg.latex?Q" />-function, we can always act perfectly to maximize our reward. We just select the action that gives us the highest <img src="http://latex.codecogs.com/svg.latex?Q" />-value of for our current state among all of the states. If we repeat this process until the terminal state, we will get the perfect trajectory possible.
+The action value function is also called <img src="http://latex.codecogs.com/svg.latex?Q" />-function, it is the function that our algorithm is trying to find. Once we have the optimal <img src="http://latex.codecogs.com/svg.latex?Q" />-function, we can always act perfectly to maximize our reward. At every timestep, we select the action that gives us the highest <img src="http://latex.codecogs.com/svg.latex?Q" />-value of for our current state. If we repeat this process until the terminal state, we will get the perfect trajectory possible.
 
 But how can we find this optimal <img src="http://latex.codecogs.com/svg.latex?Q" />-function? We cannot possibly try every policy as the definition suggest. We need a different but equivalent definition for this <img src="http://latex.codecogs.com/svg.latex?Q" />-function.
 
@@ -133,9 +134,7 @@ One of the problems with <img src="http://latex.codecogs.com/svg.latex?Q" />-lea
 
 There is a tradeoff between exploring too much or too little. This is called the **exploration-exploitation tradeoff**. If we always exploit what we think is good, we will never know what is actually good. If we always explore our environment, we will fail very early on, so we cannot get good scores nor explore advanced states.
 
-A very simple solution is to use the **<img src="http://latex.codecogs.com/svg.latex?\mathbf{\epsilon}" />-greedy strategy**. <img src="http://latex.codecogs.com/svg.latex?\epsilon" /> is a hyperparameter that we choose, it represents how much we want to explore
-
-With a probability of <img src="http://latex.codecogs.com/svg.latex?\epsilon" />, we choose a random action to explore the environment. With a probability of 1-<img src="http://latex.codecogs.com/svg.latex?\epsilon" />, we exploit by choosing the optimal action according to <img src="http://latex.codecogs.com/svg.latex?Q" />
+A very simple solution is to use the **<img src="http://latex.codecogs.com/svg.latex?\mathbf{\epsilon}" />-greedy strategy**. <img src="http://latex.codecogs.com/svg.latex?\epsilon" /> is a hyperparameter that we choose, it represents how much we want to explore. With a probability of <img src="http://latex.codecogs.com/svg.latex?\epsilon" />, we choose a random action to explore the environment. With a probability of 1-<img src="http://latex.codecogs.com/svg.latex?\epsilon" />, we exploit by choosing the optimal action according to <img src="http://latex.codecogs.com/svg.latex?Q" />
 
 ### Q-Function Approximation using Neural Networks
 
@@ -143,9 +142,9 @@ Let's fix our previous assumption about a tabular representation of <img src="ht
 
 Atari has a 210 x 160 screen with 128 possible colors for each pixel. If we stack the last 4 frames as input to our state (to satisfy Markov assumption), then the state space has a size of <img src="http://latex.codecogs.com/svg.latex?128^{4 \cdot 210 \cdot 160}" />. Even if we use ram inputs, the state space still has a size of <img src="http://latex.codecogs.com/svg.latex?256^{128}" />. It is simply impossible to maintain a table this large.
 
-This is where neural networks and deep learning come in. Neural networks are a universal approximator that can extract higher level features (e.g. the network can understand that colors dowi not matter, a nearly completed game state should have a lower <img src="http://latex.codecogs.com/svg.latex?Q" />-value than the initial state, etc). Instead of updating the <img src="http://latex.codecogs.com/svg.latex?Q" />-value of a single state one at a time, we update our parameters for our <img src="http://latex.codecogs.com/svg.latex?Q" />-network so that the <img src="http://latex.codecogs.com/svg.latex?Q" />-network will give a better prediction for all statese on average. It doesn't have to memorize the <img src="http://latex.codecogs.com/svg.latex?Q" />-value for each possible individual state.
+This is where neural networks and deep learning come in. Neural networks are a universal approximator that can extract higher level features (e.g. the network can understand that colors dowi not matter, a nearly completed game state should have a lower <img src="http://latex.codecogs.com/svg.latex?Q" />-value than the initial state, etc). Instead of updating the <img src="http://latex.codecogs.com/svg.latex?Q" />-value of a single state one at a time, we update our parameters for our <img src="http://latex.codecogs.com/svg.latex?Q" />-network so that the <img src="http://latex.codecogs.com/svg.latex?Q" />-network will give a better prediction for all states on average. It doesn't have to memorize the <img src="http://latex.codecogs.com/svg.latex?Q" />-value for each possible state-action pair.
 
-A common architecture is for the neural network to take an entire state as its input, the output later contains the <img src="http://latex.codecogs.com/svg.latex?Q" />-value for each action at that state. 
+A common architecture is for the neural network to take an entire state as its input, the output layer contains the <img src="http://latex.codecogs.com/svg.latex?Q" />-value for each action at that state. 
 
 <p align="center">
 <img src="https://deeplizard.com/images/Deep%20Q-Network.png", height="300"/>
@@ -195,7 +194,7 @@ Huber loss (called smooth l1 loss in PyTorch) is a mixture of Mean Absolute Erro
 <img src="https://i.imgur.com/wBAEdJn.png" height="250"/>
 </p>
 
-Here is the comparison between MSE (blue) and Huber (red). MSE's gradient increases quadratically, Huber's gradient increases when error is small but remains constant once the error exceeds 1.
+Here is the comparison between MSE (blue) and Huber (red). MSE's gradient increases quadratically, Huber's gradient increases with error when the error is small but remains constant once the error exceeds 1.
 
 ### Experience Replay
 
@@ -233,7 +232,7 @@ Let's take a closer look at the way <img src="http://latex.codecogs.com/svg.late
 
 In this equation, we are assuming that the best action for the next state is the action with the highest <img src="http://latex.codecogs.com/svg.latex?Q" />-value, but how are we sure this is true? This would be true if we already have the optimal <img src="http://latex.codecogs.com/svg.latex?Q" />-function, but we do not have the optimal <img src="http://latex.codecogs.com/svg.latex?Q" />-function yet, we are trying to learn it.
    
-The accuracy of the <img src="http://latex.codecogs.com/svg.latex?Q" />-values depends on what states/actions we have explored. When we visit a state for the first time, we do not have enough information about the best action to take. If non-optimal actions are regularly given a higher Q value than the optimal best action, the learning will be complicated.
+The accuracy of the <img src="http://latex.codecogs.com/svg.latex?Q" />-values depends on what states/actions we have explored. When we visit a state for the first time, we do not have enough information about the best action to take. If non-optimal actions are regularly given a higher Q value than the optimal best action, learning will be complicated.
 
 Hasselt et al proposed double DQNs to decouple action selection from target evaluation<sup> <a name="fifthb"> [\[5\]](#fiftha)</a> </sup>. We use the <img src="http://latex.codecogs.com/svg.latex?Q" />-network to select the best action to take for the next state, then use the target network to evaluate the <img src="http://latex.codecogs.com/svg.latex?Q" />-value of taking that action. Doing this can help reduce overestimation of <img src="http://latex.codecogs.com/svg.latex?Q" />-values.
 <p align="center">
